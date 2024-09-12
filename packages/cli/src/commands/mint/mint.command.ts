@@ -80,22 +80,29 @@ export class MintCommand extends BoardcastCommand {
             return;
           }
         }
+const MAX_RETRY_COUNT = 10;
+       // 在 cat_cli_run 方法的 for 循环中修改
+const shouldMerge = false;  // 根据需要将其设置为 true 或 false
 
-        const MAX_RETRY_COUNT = 10;
+for (let index = 0; index < MAX_RETRY_COUNT; index++) {
+    if (shouldMerge) {
+        await this.merge(token, address);  // 如果 shouldMerge 为 true，执行合并
+    } else {
+        console.log("Skipping merge operation");
+    }
 
-        for (let index = 0; index < MAX_RETRY_COUNT; index++) {
-          await this.merge(token, address);
-          const feeRate = await this.getFeeRate();
-          const feeUtxos = await this.getFeeUTXOs(address);
-          if (feeUtxos.length === 0) {
-            console.warn('Insufficient satoshis balance!');
-            return;
-          }
+    const feeRate = await this.getFeeRate();
+    const feeUtxos = await this.getFeeUTXOs(address);
+    if (feeUtxos.length === 0) {
+        console.warn('Insufficient satoshis balance!');
+        return;
+    }
 
-          const count = await getTokenMinterCount(
-            this.configService,
-            token.tokenId,
-          );
+    const count = await getTokenMinterCount(
+        this.configService,
+        token.tokenId,
+    );
+    
 
           const maxTry = count < MAX_RETRY_COUNT ? count : MAX_RETRY_COUNT;
 
